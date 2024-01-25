@@ -8,7 +8,7 @@ import CurrencyFormat from "react-currency-format";
 import { getBasketTotal } from "../reducer";
 import axios from "../axios";
 import { db } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 
 function Payment() {
   const [{ basket, user }, dispatch] = useStateValue();
@@ -34,9 +34,10 @@ function Payment() {
           url: `/payments/create?total=${getBasketTotal(basket) * 100}`,
         });
         setClientSecret(response.data.clientSecret);
+        console.log("Try >>> ", response.data.clientSecret);
         // Handle the response
       } catch (error) {
-        console.error("Axios Error:", error);
+        console.error("Axios Error >>> : ", error);
       }
     };
     getClientSecret();
@@ -58,41 +59,15 @@ function Payment() {
       .then(({ paymentIntent }) => {
         // paymentIntent = payment confirmation
 
-        db.collection("users")
-          .doc(user?.uid)
-          .collection("orders")
-          .doc(paymentIntent.id)
-          .set({
+        // Add a new document named user?.uid in collection "user"
+        // Create a new collection named "orders" inside the user?.uid document
+        // Add a new document named paymentIntent.id in collection "orders"
+        setDoc(doc(collection(doc(db, "users", user?.uid), "orders"),paymentIntent.id),{
             basket: basket,
             amount: paymentIntent.amount,
-            created: paymentIntent.create,
-          });
-
-        // Add a new document with a generated id.
-        // const docRef = addDoc(collection(db, "users"), {
-        //   name: "Tokyo",
-        //   country: "Japan"
-        // });
-        // console.log("Document written with ID: ", docRef.id);
-
-        // try {
-        //   const userDocRef = db.collection("users").doc(user?.id);
-        //   const ordersCollectionRef = userDocRef.collection("orders");
-        //   const orderDocRef = ordersCollectionRef.doc(paymentIntent.id);
-
-        //   userDocRef.set({}); // Create the user document if it doesn't exist
-        //   ordersCollectionRef.add({}); // Create the orders collection if it doesn't exist
-
-        //   orderDocRef.set({
-        //     basket: basket,
-        //     amount: paymentIntent.amount,
-        //     created: paymentIntent.create,
-        //   });
-
-        //   console.log("Data added successfully!");
-        // } catch (error) {
-        //   console.error("Error adding data:", error);
-        // }
+            created: paymentIntent.created,
+          }
+        );
 
         setSucceeded(true);
         setError(null);
