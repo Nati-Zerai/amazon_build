@@ -8,7 +8,7 @@ import CurrencyFormat from "react-currency-format";
 import { getBasketTotal } from "../reducer";
 import axios from "../axios";
 import { db } from "../firebase";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+// import { collection, addDoc, doc, setDoc } from "firebase";
 
 function Payment() {
   const [{ basket, user }, dispatch] = useStateValue();
@@ -58,16 +58,28 @@ function Payment() {
       })
       .then(({ paymentIntent }) => {
         // paymentIntent = payment confirmation
+        
+        db
+        .collection('users')
+        .doc(user?.uid)
+        .collection('orders')
+        .doc(paymentIntent.id)
+        .set({
+          basket: basket,
+          amount: paymentIntent.amount,
+          created: paymentIntent.created,
+      })
 
+        // below commented is firebase version 12 code (same as above)
         // Add a new document named user?.uid in collection "user"
         // Create a new collection named "orders" inside the user?.uid document
         // Add a new document named paymentIntent.id in collection "orders"
-        setDoc(doc(collection(doc(db, "users", user?.uid), "orders"),paymentIntent.id),{
-            basket: basket,
-            amount: paymentIntent.amount,
-            created: paymentIntent.created,
-          }
-        );
+        // setDoc(doc(collection(doc(db, "users", user?.uid), "orders"),paymentIntent.id),{
+            // basket: basket,
+            // amount: paymentIntent.amount,
+            // created: paymentIntent.created,
+        //   }
+        // );
 
         setSucceeded(true);
         setError(null);

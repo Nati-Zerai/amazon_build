@@ -2,23 +2,28 @@ import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword  } from "firebase/auth";
+// import {
+//   createUserWithEmailAndPassword,
+//   signInWithEmailAndPassword,
+// } from "firebase/auth";
 
 function Login() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const signIn = (e) => {
     e.preventDefault();
 
-    signInWithEmailAndPassword(auth, email, password)
+    // signInWithEmailAndPassword(auth, email, password)
+    auth
+      .signInWithEmailAndPassword(email, password)
       .then((auth) => {
         //it successfully logged in user with email and password
         // auth = response
         console.log(auth);
         if (auth) {
-          navigate('/')
+          navigate("/");
         }
       })
       .catch((error) => alert(error.message));
@@ -26,19 +31,20 @@ function Login() {
 
   const register = (e) => {
     e.preventDefault();
-    
-    createUserWithEmailAndPassword(auth, email, password)
+
+    // createUserWithEmailAndPassword(auth, email, password)
+    auth
+      .createUserWithEmailAndPassword(email, password)
       .then((auth) => {
         //it successfully created a new user with email and password
         // auth = response
         console.log(auth);
         if (auth) {
-          navigate('/')
+          navigate("/");
         }
       })
       .catch((error) => alert(error.message));
-
-    };
+  };
 
   return (
     <div className="login">
